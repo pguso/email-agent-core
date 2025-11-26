@@ -1,26 +1,56 @@
-import {Action, HumanMessage, LlamaCppLLM, SystemMessage} from "../agent-engine/index.js";
-import {JsonOutputParser} from "../agent-engine/core/JsonParser.js";
-import {EmailClassification} from "./types/EmailClassification.js";
+import {Action, HumanMessage, SystemMessage, LlamaCppLLM, TemplatePrompt} from "../agent-engine/index.js";
+import { JsonOutputParser } from "../agent-engine/core/JsonParser.js";
+import { EmailClassification } from "./types/EmailClassification.js";
+
+/**
+ * Default classification prompt template.
+ * Can be fully replaced by user via constructor injection.
+ */
+const DEFAULT_CLASSIFICATION_TEMPLATE = `
+Analyze the following email and return ONLY valid JSON.
+
+Required fields:
+- category: booking | inquiry | complaint | cancellation | other
+- priority: urgent | high | medium | low
+- sentiment: positive | neutral | negative
+- advert: boolean
+- extractedInfo: {
+    guestName?,
+    checkIn?,
+    checkOut?,
+    roomType?,
+    numberOfGuests?
+}
+- suggestedAction: string
+- confidence: number between 0.000–1.000
+
+Email Subject: {subject}
+Email Body: {body}
+
+Respond ONLY with valid JSON.
+`.trim();
 
 /**
  * EmailClassifier
  *
- * A reusable Action that:
- * - builds a prompt
- * - calls LlamaCppLLM
- * - parses JSON using JsonOutputParser
- *
- * Fully composable inside your minimal framework.
+ * - Builds prompt from template
+ * - Sends to LLM
+ * - Parses JSON via JsonOutputParser
  */
 export class EmailClassifier extends Action {
     private llm: LlamaCppLLM;
+    private prompt: TemplatePrompt;
     private parser: JsonOutputParser;
 
-    constructor(llm: LlamaCppLLM) {
+    constructor(
+        llm: LlamaCppLLM,
+        promptTemplate: TemplatePrompt = TemplatePrompt.fromTemplate(DEFAULT_CLASSIFICATION_TEMPLATE)
+    ) {
         super();
         this.llm = llm;
+        this.prompt = promptTemplate;
 
-        // Optional: enforce schema
+        // JSON parser with optional schema
         this.parser = new JsonOutputParser({
             schema: {
                 advert: "boolean",
@@ -34,26 +64,13 @@ export class EmailClassifier extends Action {
     }
 
     /**
-     * Convert subject/body into classification instructions
+     * Map input → template variables
      */
-    private buildPrompt(subject: string, body: string): string {
-        return `
-Analyze the following email and return ONLY valid JSON.
-
-Required fields:
-- category: booking | inquiry | complaint | cancellation | other
-- priority: urgent | high | medium | low
-- sentiment: positive | neutral | negative
-- advert: boolean
-- extractedInfo: { guestName?, checkIn?, checkOut?, roomType?, numberOfGuests? }
-- suggestedAction: string
-- confidence: number between 0.000–1.000
-
-Email Subject: ${subject}
-Email Body: ${body}
-
-Respond ONLY with valid JSON.
-`.trim();
+    private buildVariables(subject: string, body: string) {
+        return {
+            subject,
+            body,
+        };
     }
 
     /**
@@ -62,11 +79,12 @@ Respond ONLY with valid JSON.
     async execute(input: { subject: string; body: string }): Promise<EmailClassification> {
         const { subject, body } = input;
 
-        const prompt = this.buildPrompt(subject, body);
+        const variables = this.buildVariables(subject, body);
+        const finalPrompt = await this.prompt.run(variables);
 
         const response = await this.llm.run([
             new SystemMessage("You are an email classification assistant for a hotel."),
-            new HumanMessage(prompt)
+            new HumanMessage(finalPrompt)
         ]);
 
         return this.parser.run(response.content);

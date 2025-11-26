@@ -536,7 +536,7 @@ See `test-real.js` for comprehensive workflow examples and tests including:
 
 ## License
 
-ISC
+MIT
 
 ## Contributing
 
@@ -550,9 +550,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Important Notes
 
-### LLM Model Requirements
+### LLM Model Requirements 
 
-You need to download a compatible GGUF model file. Popular options:
+You need to download a compatible GGUF model file if you want to use local inference. Popular options:
 - Llama 2 or 3 models
 - Mistral models
 - Phi models
@@ -578,9 +578,6 @@ Be mindful of:
 Planned features:
 - Support for more LLM providers (Anthropic, Google AI, etc.)
 - Scheduled email processing with cron
-- Database integration for email history
-- REST API wrapper
-- Web dashboard for monitoring
 - Advanced email threading and conversation tracking
 
 ## Tips

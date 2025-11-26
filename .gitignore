@@ -4,6 +4,6 @@ dist
 scripts
 email-agent-core.config.json
 test.js
-test-real.js
 test-internal.js
 coverage
+.env
