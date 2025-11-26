@@ -1,0 +1,16 @@
+src/
+tests/
+node_modules/
+*.log
+tsconfig.json
+
+
+node_modules
+.idea
+scripts
+email-agent-core.config.json
+test.js
+test-real.js
+test-internal.js
+coverage
+.env
