@@ -154,7 +154,7 @@ Line 3: {var3}`;
       template: 'Test {value}'
     });
 
-    const result = await prompt._execute({ value: 'data' });
+    const result = await prompt.execute({ value: 'data' });
     expect(result).toBe('Test data');
   });
 

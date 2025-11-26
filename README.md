@@ -1,6 +1,6 @@
-# email-agent-core
+# E-Mail Agent
 
-A powerful, lightweight npm package for building intelligent email automation agents. This package provides a composable framework to fetch, parse, classify, and respond to emails using local LLM models.
+A powerful, lightweight npm package for building intelligent email automation agents. This package provides a composable framework to fetch, parse, classify, and respond to emails using LLM models (both local and cloud-based).
 
 ## Features
 
@@ -9,7 +9,7 @@ A powerful, lightweight npm package for building intelligent email automation ag
 - **AI-Powered Classification**: Automatically classify emails by category, priority, sentiment, and more
 - **Smart Response Generation**: Generate contextual, professional email responses using LLM
 - **Composable Architecture**: Chain agents together to create complex workflows
-- **Local LLM Support**: Uses `node-llama-cpp` for privacy-focused, offline AI processing
+- **Multiple LLM Providers**: Support for both local models (`node-llama-cpp`) and cloud providers (OpenAI)
 - **TypeScript First**: Written in TypeScript with full type definitions
 
 ## Installation
@@ -17,14 +17,6 @@ A powerful, lightweight npm package for building intelligent email automation ag
 ```bash
 npm install email-agent-core
 ```
-
-### Dependencies
-
-This package requires the following peer dependencies:
-- `node-llama-cpp` - For LLM inference
-- `imap` - For IMAP email fetching
-- `mailparser` - For parsing email content
-- `nodemailer` - For sending emails (optional)
 
 ## Quick Start
 
@@ -68,10 +60,12 @@ console.log({
 
 ### 3. Classify Emails with AI
 
+#### Using Local LLM (LlamaCppLLM)
+
 ```javascript
 import { EmailClassifier, LlamaCppLLM } from 'email-agent-core';
 
-// Initialize LLM
+// Initialize local LLM
 const llm = new LlamaCppLLM({
   modelPath: './models/llama-model.gguf',
   temperature: 0.7
@@ -101,6 +95,30 @@ console.log(classification);
 //   suggestedAction: 'Check availability and respond with pricing',
 //   confidence: 0.95
 // }
+```
+
+#### Using OpenAI
+
+```javascript
+import { EmailClassifier, OpenAILLM } from 'email-agent-core';
+
+// Initialize OpenAI LLM
+const llm = new OpenAILLM({
+  model: 'gpt-4o-mini',
+  temperature: 0.2,
+  apiKey: process.env.OPENAI_API_KEY // or your API key
+});
+
+// Create classifier
+const classifier = new EmailClassifier(llm);
+
+// Classify an email
+const classification = await classifier.execute({
+  subject: 'Booking Request for December',
+  body: 'Hi, I would like to book a room for 2 nights...'
+});
+
+console.log(classification);
 ```
 
 ### 4. Generate Email Responses
@@ -350,6 +368,41 @@ interface LlamaCppLLMOptions {
 **Methods:**
 - `async run(messages: BaseMessage[]): Promise<AIMessage>`: Generate completion from messages
 
+### OpenAILLM
+
+Cloud-based LLM interface using OpenAI API.
+
+**Constructor:**
+```javascript
+const llm = new OpenAILLM(options: OpenAILLMOptions)
+```
+
+**Options:**
+```typescript
+interface OpenAILLMOptions {
+  model: string;           // OpenAI model name (e.g., 'gpt-4o-mini', 'gpt-4', 'gpt-3.5-turbo')
+  apiKey: string;          // Your OpenAI API key
+  temperature?: number;    // Sampling temperature (0.0 - 2.0)
+  maxTokens?: number;      // Maximum tokens to generate
+  topP?: number;           // Nucleus sampling
+  // ... additional OpenAI options
+}
+```
+
+**Methods:**
+- `async run(messages: BaseMessage[]): Promise<AIMessage>`: Generate completion from messages
+
+**Example:**
+```javascript
+import { OpenAILLM } from 'email-agent-core';
+
+const llm = new OpenAILLM({
+  model: 'gpt-4o-mini',
+  temperature: 0.2,
+  apiKey: process.env.OPENAI_API_KEY
+});
+```
+
 ### Action Base Class
 
 All agents extend the `Action` class, providing composability.
@@ -450,10 +503,24 @@ const config = loadEmailConfig();
 
 ## Privacy & Security
 
-- **Local LLM Processing**: All AI processing happens locally using `node-llama-cpp`
+The package supports two LLM options with different privacy implications:
+
+### Local LLM (LlamaCppLLM) - Maximum Privacy
+- **Local Processing**: All AI processing happens locally using `node-llama-cpp`
 - **No External API Calls**: Email content never leaves your server
 - **GDPR Compliant**: Full control over data processing and storage
+- **Offline Capable**: Works without internet connection for AI processing
+
+### Cloud LLM (OpenAI) - Convenience & Performance
+- **External API**: Email content is sent to OpenAI for processing
+- **API Key Required**: Secure API key authentication
+- **Privacy Considerations**: Review OpenAI's data usage policies
+- **High Performance**: Fast inference with powerful models
+
+### General Security
 - **Secure Connections**: TLS/SSL support for IMAP/SMTP connections
+- **Configuration Security**: Store credentials securely (use environment variables)
+- **Flexible Choice**: Choose the LLM provider that fits your privacy requirements
 
 ## Testing
 
@@ -461,7 +528,11 @@ const config = loadEmailConfig();
 npm test
 ```
 
-See `test.js` for comprehensive workflow examples and tests.
+See `test-real.js` for comprehensive workflow examples and tests including:
+- Real IMAP/SMTP integration tests
+- AI email classification with both local and OpenAI models
+- Complete workflow demonstrations
+- Email sending examples
 
 ## License
 
@@ -505,21 +576,25 @@ Be mindful of:
 ## Future Enhancements
 
 Planned features:
-- Support for more LLM providers (OpenAI, Anthropic, etc.)
-- Email sending with nodemailer integration
+- Support for more LLM providers (Anthropic, Google AI, etc.)
 - Scheduled email processing with cron
 - Database integration for email history
 - REST API wrapper
 - Web dashboard for monitoring
+- Advanced email threading and conversation tracking
 
 ## Tips
 
-1. **Start Small**: Begin with a small model (7B parameters) for faster inference
-2. **Batch Processing**: Use `runBatch()` for processing multiple emails efficiently
-3. **Streaming**: Use `streamOutput()` for real-time response generation
-4. **Chaining**: Combine agents using `chain()` for complex workflows
-5. **Error Handling**: Always wrap agent calls in try-catch blocks
-6. **Testing**: Test thoroughly with sample emails before production use
+1. **Choose Your LLM Provider**: 
+   - Use **OpenAI** for quick setup, high performance, and minimal resource requirements
+   - Use **Local LLM** for maximum privacy, offline capability, and no API costs
+2. **Start Small**: Begin with a small model (7B parameters) for faster local inference
+3. **API Keys**: Store OpenAI API keys in environment variables, never in code
+4. **Batch Processing**: Use `runBatch()` for processing multiple emails efficiently
+5. **Streaming**: Use `streamOutput()` for real-time response generation
+6. **Chaining**: Combine agents using `chain()` for complex workflows
+7. **Error Handling**: Always wrap agent calls in try-catch blocks
+8. **Testing**: Test thoroughly with sample emails before production use (see `test-real.js`)
 
 ## Support
 

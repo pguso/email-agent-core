@@ -286,7 +286,7 @@ describe('JsonOutputParser', () => {
   describe('Action interface compatibility', () => {
     it('should work with _execute method', async () => {
       const parser = new JsonOutputParser();
-      const result = await parser._execute('{"test": true}');
+      const result = await parser.execute('{"test": true}');
 
       expect(result).toEqual({ test: true });
     });

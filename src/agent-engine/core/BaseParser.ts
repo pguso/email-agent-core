@@ -28,7 +28,7 @@ export abstract class BaseOutputParser extends Action {
     /**
      * Runnable interface: parse the output
      */
-    async _execute(
+    async execute(
         input: string | { content: string },
         _config?: ActionContext
     ): Promise<any> {

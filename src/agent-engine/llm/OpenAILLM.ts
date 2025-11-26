@@ -78,7 +78,7 @@ export class OpenAILLM extends Action {
     /**
      * Core generation method (like llama._execute)
      */
-    async _execute(
+    async execute(
         input: string | BaseMessage[],
         config: GenerationConfig = {}
     ): Promise<AIMessage> {
@@ -119,7 +119,7 @@ export class OpenAILLM extends Action {
         const results: AIMessage[] = [];
 
         for (const input of inputs) {
-            results.push(await this._execute(input, config));
+            results.push(await this.execute(input, config));
         }
 
         return results;

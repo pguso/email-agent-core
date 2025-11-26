@@ -59,7 +59,7 @@ Respond ONLY with valid JSON.
     /**
      * Execute classification
      */
-    async _execute(input: { subject: string; body: string }): Promise<EmailClassification> {
+    async execute(input: { subject: string; body: string }): Promise<EmailClassification> {
         const { subject, body } = input;
 
         const prompt = this.buildPrompt(subject, body);

@@ -34,7 +34,7 @@ describe('BasePrompt', () => {
 
   it('should execute via _execute method', async () => {
     const prompt = new TestPrompt();
-    const result = await prompt._execute({ key: 'value' });
+    const result = await prompt.execute({ key: 'value' });
 
     expect(result).toBe('Rendered: {"key":"value"}');
   });

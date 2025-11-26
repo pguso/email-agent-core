@@ -62,7 +62,7 @@ Tone: friendly, professional, concise, helpful.
     /**
      * Execute: generate the actual email reply
      */
-    async _execute(input: {
+    async execute(input: {
         originalEmail: string;
         context: ResponseContext;
     }): Promise<string> {

@@ -227,7 +227,7 @@ export class LlamaCppLLM extends Action {
    * @param config - Runtime configuration
    * @returns Generated response as AIMessage
    */
-  async _execute(input: string | BaseMessage[], config: GenerationConfig = {}): Promise<AIMessage> {
+  async execute(input: string | BaseMessage[], config: GenerationConfig = {}): Promise<AIMessage> {
     // Ensure model is loaded (only happens once)
     await this._initialize();
 
@@ -314,7 +314,7 @@ export class LlamaCppLLM extends Action {
     const results: AIMessage[] = [];
     for (const input of inputs) {
       // Clear history before each batch item to prevent contamination
-      const result = await this._execute(input, { ...config, clearHistory: true });
+      const result = await this.execute(input, { ...config, clearHistory: true });
       results.push(result);
     }
     return results;

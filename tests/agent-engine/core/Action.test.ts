@@ -3,27 +3,27 @@ import { ActionContext, Action, ActionPipeline } from '../../../src/agent-engine
 
 // Test implementation of Action
 class TestAction extends Action {
-  async _execute(input: any, _config: any): Promise<any> {
+  async execute(input: any, _config: any): Promise<any> {
     return `processed: ${input}`;
   }
 }
 
 // Test implementation with streaming
 class StreamingAction extends Action {
-  async _execute(input: any, _config: any): Promise<any> {
+  async execute(input: any, _config: any): Promise<any> {
     return `streamed: ${input}`;
   }
 
   async* _streamOutput(input: any, config: any): AsyncGenerator<any, void, unknown> {
     yield `chunk1: ${input}`;
     yield `chunk2: ${input}`;
-    yield await this._execute(input, config);
+    yield await this.execute(input, config);
   }
 }
 
 // Test implementation that throws error
 class ErrorAction extends Action {
-  async _execute(_input: any, _config: any): Promise<any> {
+  async execute(_input: any, _config: any): Promise<any> {
     throw new Error('Test error');
   }
 }
@@ -73,7 +73,7 @@ describe('Action', () => {
   it('should pass config to _execute', async () => {
     const executeSpy = vi.fn().mockResolvedValue('result');
     const action = new TestAction();
-    action._execute = executeSpy;
+    action.execute = executeSpy;
 
     await action.run('input', { custom: 'config' });
 
@@ -168,7 +168,7 @@ describe('ActionPipeline', () => {
       constructor(private value: string) {
         super();
       }
-      async _execute(input: any, _config: any): Promise<any> {
+      async execute(input: any, _config: any): Promise<any> {
         return `${input}+${this.value}`;
       }
     }
@@ -197,7 +197,7 @@ describe('ActionPipeline', () => {
 
   it('should stream output from last step', async () => {
     class PassThroughAction extends Action {
-      async _execute(input: any, _config: any): Promise<any> {
+      async execute(input: any, _config: any): Promise<any> {
         return `pass: ${input}`;
       }
     }

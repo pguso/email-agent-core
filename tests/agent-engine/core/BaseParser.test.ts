@@ -35,14 +35,14 @@ describe('BaseOutputParser', () => {
 
   it('should execute with string input', async () => {
     const parser = new TestParser();
-    const result = await parser._execute('test');
+    const result = await parser.execute('test');
 
     expect(result).toEqual({ parsed: 'test' });
   });
 
   it('should execute with object input containing content', async () => {
     const parser = new TestParser();
-    const result = await parser._execute({ content: 'test content' });
+    const result = await parser.execute({ content: 'test content' });
 
     expect(result).toEqual({ parsed: 'test content' });
   });

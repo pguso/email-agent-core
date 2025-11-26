@@ -34,7 +34,7 @@ export abstract class BasePrompt extends Action {
     /**
      * Action interface: run() calls this
      */
-    async _execute(input: any, _context?: ActionContext): Promise<string> {
+    async execute(input: any, _context?: ActionContext): Promise<string> {
         return this.render(input);
     }
 

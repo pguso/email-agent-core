@@ -82,7 +82,7 @@ describe('StringOutputParser', () => {
 
   it('should work with _execute method', async () => {
     const parser = new StringOutputParser();
-    const result = await parser._execute('  test  ');
+    const result = await parser.execute('  test  ');
 
     expect(result).toBe('test');
   });

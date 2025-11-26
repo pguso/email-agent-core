@@ -30,7 +30,7 @@ class CallbackManager {
 /**
  * Action - Base class for all composable components
  *
- * Every Action must implement the _execute() method.
+ * Every Action must implement the execute() method.
  * This base class provides run, streamOutput, runBatch, and chain.
  */
 export class Action {
@@ -61,7 +61,7 @@ export class Action {
       await callbackManager.handleStart(this, input, runnableConfig);
 
       // Execute the runnable
-      const output = await this._execute(input, runnableConfig);
+      const output = await this.execute(input, runnableConfig);
 
       // Notify callbacks: success
       await callbackManager.handleEnd(this, output, runnableConfig);
@@ -81,7 +81,7 @@ export class Action {
    * @param _config - Optional configuration
    * @returns The processed output
    */
-  async _execute(_input: any, _config: any): Promise<any> {
+  async execute(_input: any, _config: any): Promise<any> {
     throw new Error(
         `${this.name} must implement _call() method`
     );
@@ -114,7 +114,7 @@ export class Action {
    * Override this for custom streaming behavior
    */
   async* _streamOutput(input: any, config: any): AsyncGenerator<any, void, unknown> {
-    yield await this._execute(input, config);
+    yield await this.execute(input, config);
   }
 
   /**
@@ -156,7 +156,7 @@ export class ActionPipeline extends Action {
     this.steps = steps; // Array of Runnables
   }
 
-  async _execute(input: any, config: any): Promise<any> {
+  async execute(input: any, config: any): Promise<any> {
     let output = input;
 
     // Run through each step sequentially
