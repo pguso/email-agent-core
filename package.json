@@ -5,7 +5,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "build": "tsc && tsc -p tsconfig.cli.json",
     "start": "node dist/index.js",
     "dev": "tsc && node dist/index.js"
@@ -17,7 +19,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^17.2.3",
     "imap": "^0.8.19",
     "imapflow": "^1.1.1",
     "mailparser": "^3.9.0",
@@ -30,9 +31,11 @@
     "@types/mailparser": "^3.4.6",
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",
+    "@vitest/coverage-v8": "^4.0.14",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.14"
   }
 }

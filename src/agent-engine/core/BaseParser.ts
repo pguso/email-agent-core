@@ -1,4 +1,4 @@
-import {Action, ActionContext} from "./Action";
+import {Action, ActionContext} from "./Action.js";
 
 /**
  * Base class for all output parsers

@@ -1,4 +1,4 @@
-import {Action, HumanMessage, LlamaCppLLM, SystemMessage} from "../agent-engine";
+import {Action, HumanMessage, LlamaCppLLM, SystemMessage} from "../agent-engine/index.js";
 import {ResponseContext} from "./types/ResponseContext.js";
 
 /**
@@ -17,25 +17,27 @@ export class EmailResponseGenerator extends Action {
     /**
      * Build the LLM prompt from input + context
      */
-    private buildPrompt(originalEmail: string, ctx: ResponseContext): string {
+    private buildPrompt(originalEmail: string, context: ResponseContext): string {
         return `
-Hotel: ${ctx.hotelName}
-Guest Name: ${ctx.guestName ?? "Unknown"}
-Request Type: ${ctx.requestType}
+Hotel: ${context.hotelName}
+Guest Name: ${context.guestName ?? "Unknown"}
+Request Type: ${context.requestType}
+
+${context?.employeeName ? `Email is sent by: ${context.employeeName}`: ""}
 
 Context:
-- Rooms available: ${ctx.roomsAvailable ? "Yes" : "No"}
-${ctx.suggestedPrice ? `- Suggested price: $${ctx.suggestedPrice}/night` : ""}
-${ctx.checkInDate ? `- Check-in: ${ctx.checkInDate}` : ""}
-${ctx.checkOutDate ? `- Check-out: ${ctx.checkOutDate}` : ""}
+- Rooms available: ${context.roomsAvailable ? "Yes" : "No"}
+${context.suggestedPrice ? `- Suggested price: $${context.suggestedPrice}/night` : ""}
+${context.checkInDate ? `- Check-in: ${context.checkInDate}` : ""}
+${context.checkOutDate ? `- Check-out: ${context.checkOutDate}` : ""}
 
 ${
-            ctx.roomsAvailable
+            context.roomsAvailable
                 ? `
 Hotel Policies:
-- Check-in: ${ctx.hotelPolicies.checkInTime}
-- Check-out: ${ctx.hotelPolicies.checkOutTime}
-- Cancellation: ${ctx.hotelPolicies.cancellation}
+- Check-in: ${context.hotelPolicies.checkInTime}
+- Check-out: ${context.hotelPolicies.checkOutTime}
+- Cancellation: ${context.hotelPolicies.cancellation}
 `
                 : ""
         }
@@ -60,7 +62,7 @@ Tone: friendly, professional, concise, helpful.
     /**
      * Execute: generate the actual email reply
      */
-    async execute(input: {
+    async _execute(input: {
         originalEmail: string;
         context: ResponseContext;
     }): Promise<string> {

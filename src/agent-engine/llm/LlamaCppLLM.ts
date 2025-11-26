@@ -1,6 +1,6 @@
 import {getLlama, LlamaChatSession, Llama, LlamaModel, LlamaContext, ChatHistoryItem} from 'node-llama-cpp';
 import {Action} from "../core/Action.js";
-import {AIMessage, BaseMessage, HumanMessage} from "../messages";
+import {AIMessage, BaseMessage, HumanMessage} from "../messages/index.js";
 import {LlamaCppLLMOptions} from "../types/LlamaCppLLMOptions.js";
 import {GenerationConfig} from "../types/GenerationConfig.js";
 import {PromptOptions} from "../types/PromptOptions.js";

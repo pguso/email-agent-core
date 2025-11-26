@@ -83,7 +83,7 @@ export class Action {
    */
   async _execute(_input: any, _config: any): Promise<any> {
     throw new Error(
-        `${this.name} must implement _call() method`
+        `${this.name} must implement _execute() method`
     );
   }
 

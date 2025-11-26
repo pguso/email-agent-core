@@ -1,4 +1,4 @@
-import {Action, HumanMessage, LlamaCppLLM, SystemMessage} from "../agent-engine";
+import {Action, HumanMessage, LlamaCppLLM, SystemMessage} from "../agent-engine/index.js";
 import {JsonOutputParser} from "../agent-engine/core/JsonParser.js";
 import {EmailClassification} from "./types/EmailClassification.js";
 

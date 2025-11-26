@@ -1,4 +1,4 @@
-import { ParsedMail } from "mailparser";
+import {ParsedMail} from "mailparser";
 
 export interface MessageParts {
     seqno: number;

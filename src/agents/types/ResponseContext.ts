@@ -6,6 +6,7 @@ export interface ResponseContext {
     roomsAvailable: boolean;
     suggestedPrice?: number;
     hotelName: string;
+    employeeName?: string;
     hotelPolicies: {
         cancellation: string;
         checkInTime: string;

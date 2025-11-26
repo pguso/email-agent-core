@@ -1,18 +1,18 @@
 import { ParsedMail } from "mailparser";
 
-export function toFetchedEmail(m: any) {
-  const p = (m.parsed || {}) as ParsedMail;
-  const headerDate = p.date || p.headers?.get?.("date");
+export function toFetchedEmail(mail: any) {
+  const parsedMail = (mail.parsed || {}) as ParsedMail;
+  const headerDate = parsedMail.date || parsedMail.headers?.get?.("date");
 
   return {
-    uid: m.attrs?.uid,
+    uid: mail.attrs?.uid,
     date: headerDate ? new Date(headerDate.toString()) : null,
-    from: p.from?.text || null,
-    to: Array.isArray(p.to) ? p.to[0]?.text : p.to?.text || null,
-    subject: p.subject || "(No Subject)",
-    text: p.text || "",
-    html: p.html || "",
-    messageId: p.messageId || m.attrs?.uid,
-    flags: m.attrs?.flags || []
+    from: parsedMail.from?.text || null,
+    to: Array.isArray(parsedMail.to) ? parsedMail.to[0]?.text : parsedMail.to?.text || null,
+    subject: parsedMail.subject || "(No Subject)",
+    text: parsedMail.text || "",
+    html: parsedMail.html || "",
+    messageId: parsedMail.messageId || mail.attrs?.uid,
+    flags: mail.attrs?.flags || []
   };
 }

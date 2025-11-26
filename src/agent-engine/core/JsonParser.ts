@@ -1,4 +1,4 @@
-import { BaseOutputParser, OutputParserException } from "./BaseParser";
+import { BaseOutputParser, OutputParserException } from "./BaseParser.js";
 
 export type JsonSchema = Record<string, "string" | "number" | "boolean" | "object" | "array">;
 

@@ -33,4 +33,8 @@ export class EmailImapClient {
     await endConnection(this.imap);
     return msgs;
   }
+
+  async disconnect() {
+    this.imap.end();
+  }
 }
