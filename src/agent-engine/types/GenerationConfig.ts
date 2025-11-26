@@ -7,4 +7,5 @@ export interface GenerationConfig {
     stopStrings?: string[];
     clearHistory?: boolean;
     seed?: number;
+    model?: string;
 }

@@ -24,7 +24,8 @@
     "mailparser": "^3.9.0",
     "node-cron": "^4.2.1",
     "node-llama-cpp": "^3.14.2",
-    "nodemailer": "^7.0.10"
+    "nodemailer": "^7.0.10",
+    "openai": "^6.9.1"
   },
   "devDependencies": {
     "@types/imap": "^0.8.42",

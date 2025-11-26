@@ -6,6 +6,7 @@ export * from "./core/JsonParser.js";
 export * from "./core/StringParser.js";
 export * from "./core/TemplatePrompt.js";
 export * from "./llm/LlamaCppLLM.js";
+export * from "./llm/OpenAILLM.js";
 export * from "./types/ChatHistoryItem.js";
 export * from "./types/GenerationConfig.js";
 export * from "./types/LlamaCppLLMOptions.js";
