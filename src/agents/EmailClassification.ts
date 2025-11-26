@@ -6,7 +6,7 @@ import { EmailClassification } from "./types/EmailClassification.js";
  * Default classification prompt template.
  * Can be fully replaced by user via constructor injection.
  */
-const DEFAULT_CLASSIFICATION_TEMPLATE = `
+export const DEFAULT_CLASSIFICATION_TEMPLATE = `
 Analyze the following email and return ONLY valid JSON.
 
 Required fields:

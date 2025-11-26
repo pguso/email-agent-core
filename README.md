@@ -282,7 +282,10 @@ AI-powered email classification agent.
 
 **Constructor:**
 ```javascript
-const classifier = new EmailClassifier(llm: LlamaCppLLM)
+const classifier = new EmailClassifier(
+  llm: LlamaCppLLM,
+  promptTemplate?: TemplatePrompt  // Optional: custom prompt template
+)
 ```
 
 **Methods:**
@@ -309,13 +312,50 @@ interface EmailClassification {
 }
 ```
 
+**Customizing the Classification Prompt:**
+
+The `EmailClassifier` uses a default prompt template that you can access and customize:
+
+```javascript
+import { 
+  EmailClassifier, 
+  DEFAULT_CLASSIFICATION_TEMPLATE,
+  TemplatePrompt,
+  LlamaCppLLM 
+} from 'email-agent-core';
+
+// Access the default template
+console.log(DEFAULT_CLASSIFICATION_TEMPLATE);
+
+// Option 1: Use the default template
+const classifier = new EmailClassifier(llm);
+
+// Option 2: Customize the template
+const customTemplate = `
+Analyze this email and provide JSON classification.
+
+Email Subject: {subject}
+Email Body: {body}
+
+Return JSON with: category, priority, sentiment, advert, extractedInfo, suggestedAction, confidence
+`;
+
+const customClassifier = new EmailClassifier(
+  llm,
+  TemplatePrompt.fromTemplate(customTemplate)
+);
+```
+
 ### EmailResponseGenerator
 
 Generate professional email responses with context.
 
 **Constructor:**
 ```javascript
-const generator = new EmailResponseGenerator(llm: LlamaCppLLM)
+const generator = new EmailResponseGenerator(
+  llm: LlamaCppLLM,
+  promptTemplate?: TemplatePrompt  // Optional: custom prompt template
+)
 ```
 
 **Methods:**
@@ -343,6 +383,71 @@ interface ResponseContext {
   };
 }
 ```
+
+**Customizing the Response Prompt:**
+
+The `EmailResponseGenerator` uses a default prompt template that you can access and customize:
+
+```javascript
+import { 
+  EmailResponseGenerator, 
+  DEFAULT_RESPONSE_TEMPLATE,
+  TemplatePrompt,
+  LlamaCppLLM 
+} from 'email-agent-core';
+
+// Access the default template
+console.log(DEFAULT_RESPONSE_TEMPLATE);
+
+// Option 1: Use the default template
+const generator = new EmailResponseGenerator(llm);
+
+// Option 2: Customize the template
+const customTemplate = `
+You are responding to an email for {hotelName}.
+
+Guest: {guestName}
+Request: {requestType}
+Original Email: {originalEmail}
+
+Write a professional, friendly response.
+`;
+
+const customGenerator = new EmailResponseGenerator(
+  llm,
+  TemplatePrompt.fromTemplate(customTemplate)
+);
+
+// Use the custom generator
+const response = await customGenerator.execute({
+  originalEmail: email.text,
+  context: {
+    hotelName: 'Grand Hotel',
+    guestName: 'John Doe',
+    requestType: 'booking',
+    roomsAvailable: true,
+    hotelPolicies: {
+      checkInTime: '3:00 PM',
+      checkOutTime: '11:00 AM',
+      cancellation: 'Free cancellation up to 24 hours before check-in'
+    }
+  }
+});
+```
+
+**Available Template Variables:**
+
+The default response template supports these variables:
+- `{hotelName}` - Name of the hotel
+- `{guestName}` - Name of the guest
+- `{requestType}` - Type of request (booking, inquiry, etc.)
+- `{originalEmail}` - The original email content
+- `{employeeLine}` - Optional employee name line
+- `{roomsAvailable}` - Yes/No for room availability
+- `{suggestedPriceLine}` - Optional price suggestion
+- `{checkInLine}` - Optional check-in date
+- `{checkOutLine}` - Optional check-out date
+- `{policyBlock}` - Hotel policies block
 
 ### LlamaCppLLM
 
