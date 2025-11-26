@@ -1,6 +1,7 @@
 export * from "./agent-engine/index.js";
 export * from "./agents/index.js";
 export * from "./config/types.js";
+export * from "./config/loader.js";
 export * from "./imap/client.js";
 export * from "./imap/fetch.js";
 export * from "./imap/types.js";

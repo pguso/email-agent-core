@@ -1,6 +1,6 @@
 {
   "name": "email-agent-core",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A powerful, lightweight npm package for building intelligent email automation agents.",
   "main": "dist/index.js",
   "type": "module",
