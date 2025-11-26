@@ -481,5 +481,3 @@ export class LlamaCppLLM extends Action {
     return `LlamaCppLLM(model=${this.modelPath})`;
   }
 }
-
-export default LlamaCppLLM;

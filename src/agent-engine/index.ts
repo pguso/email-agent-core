@@ -1,5 +1,7 @@
 export * from "./messages/index.js";
 export * from "./core/Action.js";
+export * from "./core/BaseParser.js";
+export * from "./core/BasePrompt.js";
 export * from "./core/JsonParser.js";
 export * from "./core/StringParser.js";
 export * from "./core/TemplatePrompt.js";

@@ -9,5 +9,8 @@ export function filterMessagesByType(messages: BaseMessage[], type: string) {
 }
 
 export function getLastMessages(messages: BaseMessage[], n: number) {
+  if (n <= 0) {
+    return [];
+  }
   return messages.slice(-n);
 }

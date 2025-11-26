@@ -83,7 +83,7 @@ export class Action {
    */
   async _execute(_input: any, _config: any): Promise<any> {
     throw new Error(
-        `${this.name} must implement _execute() method`
+        `${this.name} must implement _call() method`
     );
   }
 
@@ -95,10 +95,18 @@ export class Action {
    * @yields Output chunks
    */
   async* streamOutput(input: any, config: any = {}): AsyncGenerator<any, void, unknown> {
-    // Default implementation: just yield the full result
-    // Subclasses can override for true streaming
-    const result = await this.run(input, config);
-    yield result;
+    // Check if subclass has custom _streamOutput implementation
+    // We need to check if it's been overridden from the base class
+    const hasCustomStreamOutput = this._streamOutput !== Action.prototype._streamOutput;
+    
+    if (hasCustomStreamOutput) {
+      // Use custom streaming implementation
+      yield* this._streamOutput(input, config);
+    } else {
+      // Default implementation: just yield the full result
+      const result = await this.run(input, config);
+      yield result;
+    }
   }
 
   /**

@@ -19,9 +19,17 @@ export abstract class BasePrompt extends Action {
     }
 
     /**
-     * Render the prompt with values (must be implemented by subclasses)
+     * Render the prompt with values (validates then delegates to subclass implementation)
      */
-    abstract render(values: Record<string, any>): Promise<string>;
+    async render(values: Record<string, any>): Promise<string> {
+        this.validate(values);
+        return this._render(values);
+    }
+
+    /**
+     * Internal render method that subclasses must implement
+     */
+    protected abstract _render(values: Record<string, any>): Promise<string>;
 
     /**
      * Action interface: run() calls this

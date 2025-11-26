@@ -21,10 +21,9 @@ export class TemplatePrompt extends BasePrompt {
     }
 
     /**
-     * Render the prompt by replacing placeholders
+     * Internal render implementation - replaces placeholders with values
      */
-    async render(values: Record<string, any>): Promise<string> {
-        this.validate(values);
+    protected async _render(values: Record<string, any>): Promise<string> {
         const merged = this.mergeVariables(values);
 
         let result = this.template;
