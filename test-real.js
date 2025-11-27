@@ -110,20 +110,20 @@ async function runRealWorldTest() {
   logStep(2, 'Test IMAP Connection and Fetch Emails');
   
   let fetchedEmails = [];
-  
+
   try {
     console.log('Connecting to IMAP server...');
     const imapClient = new EmailImapClient(config.imap);
     
     console.log('Attempting to fetch latest emails...');
-    const fetchedEmails = await fetchLatestEmails(imapClient, 5);
+    fetchedEmails = await fetchLatestEmails(5);
     
     logSuccess(`Connected successfully to ${config.imap.host}`);
     logInfo(`Fetched ${fetchedEmails.length} email(s) from inbox`);
 
     // Transform emails
     if (fetchedEmails.length > 0) {
-      fetchedEmails.slice(0, 10).forEach((email, idx) => {
+      fetchedEmails.forEach((email, idx) => {
         console.log(`  ${idx + 1}. From: ${email.from}`);
         console.log(`     Subject: ${email.subject}`);
         console.log(`     Date: ${email.date}`);

@@ -12,6 +12,8 @@ A powerful, lightweight npm package for building intelligent email automation ag
 - **Multiple LLM Providers**: Support for both local models (`node-llama-cpp`) and cloud providers (OpenAI)
 - **TypeScript First**: Written in TypeScript with full type definitions
 
+> If you want to dig deeper into how email-agent-core is build, what opportunities it offers and production ready examples read [TUTORIAL.md](TUTORIAL.md)
+
 ## Installation
 
 ```bash
@@ -221,6 +223,150 @@ async function processEmails() {
 processEmails().catch(console.error);
 ```
 
+## Sending Messages
+
+The package provides a simple `sendEmail()` function to send emails via SMTP. The SMTP configuration is automatically loaded from your `email-agent-core.config.json` file.
+
+### Basic Email Sending
+
+```javascript
+import { sendEmail } from 'email-agent-core';
+
+// Send a simple text email
+const result = await sendEmail({
+  to: 'recipient@example.com',
+  subject: 'Hello from email-agent-core',
+  text: 'This is a plain text email message.'
+});
+
+console.log('Email sent!', result.messageId);
+```
+
+### Sending HTML Emails
+
+```javascript
+import { sendEmail } from 'email-agent-core';
+
+// Send an HTML email with both text and HTML versions
+const result = await sendEmail({
+  to: 'recipient@example.com',
+  subject: 'Welcome to Our Service',
+  text: 'Welcome! This is the plain text version.',
+  html: `
+    <html>
+      <body>
+        <h1>Welcome!</h1>
+        <p>This is a <strong>formatted HTML</strong> email.</p>
+      </body>
+    </html>
+  `
+});
+
+console.log('HTML email sent!', result);
+```
+
+### Sending Automated Responses
+
+Here's a complete example that generates and sends an AI-powered response:
+
+```javascript
+import { 
+  fetchLatestEmails,
+  EmailClassifier,
+  EmailResponseGenerator,
+  sendEmail,
+  LlamaCppLLM 
+} from 'email-agent-core';
+
+async function autoRespond() {
+  // Initialize LLM
+  const llm = new LlamaCppLLM({
+    modelPath: './models/llama-model.gguf',
+    temperature: 0.7
+  });
+
+  // Create agents
+  const classifier = new EmailClassifier(llm);
+  const responseGenerator = new EmailResponseGenerator(llm);
+
+  // Fetch latest emails
+  const emails = await fetchLatestEmails(5);
+
+  for (const email of emails) {
+    // Classify email
+    const classification = await classifier.execute({
+      subject: email.subject,
+      body: email.text
+    });
+
+    // Only respond to high priority, non-advertisement emails
+    if (!classification.advert && classification.priority === 'high') {
+      // Generate response
+      const response = await responseGenerator.execute({
+        originalEmail: email.text,
+        context: {
+          hotelName: 'Grand Hotel',
+          guestName: classification.extractedInfo?.guestName,
+          requestType: classification.category,
+          roomsAvailable: true,
+          hotelPolicies: {
+            checkInTime: '3:00 PM',
+            checkOutTime: '11:00 AM',
+            cancellation: 'Free cancellation up to 24 hours before check-in'
+          }
+        }
+      });
+
+      // Send the generated response
+      await sendEmail({
+        to: email.from,
+        subject: `Re: ${email.subject}`,
+        text: response,
+        html: `<p>${response.replace(/\n/g, '<br>')}</p>`
+      });
+
+      console.log(`✅ Sent response to ${email.from}`);
+    }
+  }
+}
+
+autoRespond().catch(console.error);
+```
+
+### SendEmail Options
+
+The `sendEmail()` function accepts the following options:
+
+```typescript
+interface SendEmailOptions {
+  to: string;         // Required: Recipient email address
+  subject?: string;   // Email subject line
+  text?: string;      // Plain text version of the email
+  html?: string;      // HTML version of the email
+  user?: string;      // Optional: Override sender (defaults to config)
+}
+```
+
+### SendEmail Result
+
+The function returns a promise that resolves to:
+
+```typescript
+interface SendEmailResult {
+  messageId: string;           // Unique message identifier
+  accepted: string[];          // Array of accepted recipient addresses
+  rejected: string[];          // Array of rejected recipient addresses
+}
+```
+
+### Important Notes
+
+- **Configuration Required**: Ensure your `email-agent-core.config.json` includes valid SMTP settings
+- **Authentication**: For Gmail, you'll need an app-specific password (see Configuration section)
+- **Error Handling**: Always wrap `sendEmail()` in try-catch blocks to handle connection errors
+- **Rate Limiting**: Be mindful of your email provider's sending limits
+- **Email Format**: Providing both `text` and `html` ensures compatibility with all email clients
+
 ## API Reference
 
 ### EmailImapClient
@@ -246,6 +392,7 @@ interface ImapConfig {
 **Methods:**
 - `async connect()`: Connect to the IMAP server
 - `async fetchLatest(limit?: number)`: Fetch the latest N emails (default: 10)
+- `async disconnect()`: Close the IMAP connection
 
 ### fetchLatestEmails(limit)
 
@@ -525,6 +672,237 @@ const pipeline = classifier.chain(responseGenerator);
 const result = await pipeline.run(input);
 ```
 
+### sendEmail(options)
+
+Send emails via SMTP using the configuration from `email-agent-core.config.json`.
+
+**Parameters:**
+```typescript
+interface SendEmailOptions {
+  to: string;         // Required: Recipient email address
+  subject?: string;   // Email subject line
+  text?: string;      // Plain text version of the email
+  html?: string;      // HTML version of the email
+  user?: string;      // Optional: Override sender (defaults to config)
+}
+```
+
+**Returns:**
+```typescript
+Promise<SendEmailResult>
+
+interface SendEmailResult {
+  messageId: string;           // Unique message identifier
+  accepted: string[];          // Array of accepted recipient addresses
+  rejected: string[];          // Array of rejected recipient addresses
+}
+```
+
+**Example:**
+```javascript
+import { sendEmail } from 'email-agent-core';
+
+const result = await sendEmail({
+  to: 'recipient@example.com',
+  subject: 'Hello',
+  text: 'Plain text message',
+  html: '<p>HTML message</p>'
+});
+
+console.log('Sent:', result.messageId);
+```
+
+### loadEmailConfig()
+
+Load email configuration from `email-agent-core.config.json` in the project root.
+
+**Returns:**
+```typescript
+interface EmailConfig {
+  imap: {
+    host: string;
+    port: number;
+    tls: boolean;
+    user: string;
+    pass: string;
+  };
+  smtp: {
+    host: string;
+    port: number;
+    secure: boolean;
+    user: string;
+    pass: string;
+  };
+}
+```
+
+**Example:**
+```javascript
+import { loadEmailConfig } from 'email-agent-core';
+
+const config = loadEmailConfig();
+console.log('IMAP host:', config.imap.host);
+```
+
+**Throws:** Error if `email-agent-core.config.json` is not found.
+
+### Message Classes
+
+Message classes for LLM communication.
+
+#### BaseMessage
+
+Base class for all message types.
+
+**Properties:**
+- `content: string` - Message content
+- `role: string` - Message role (system, user, assistant, tool)
+
+#### SystemMessage
+
+System-level instructions for the LLM.
+
+```javascript
+import { SystemMessage } from 'email-agent-core';
+
+const msg = new SystemMessage('You are a helpful assistant.');
+```
+
+#### HumanMessage
+
+User input messages.
+
+```javascript
+import { HumanMessage } from 'email-agent-core';
+
+const msg = new HumanMessage('What is the weather today?');
+```
+
+#### AIMessage
+
+Assistant/AI response messages.
+
+```javascript
+import { AIMessage } from 'email-agent-core';
+
+const msg = new AIMessage('The weather is sunny today.');
+```
+
+#### ToolMessage
+
+Tool execution result messages.
+
+```javascript
+import { ToolMessage } from 'email-agent-core';
+
+const msg = new ToolMessage('Tool result data', 'tool-call-id');
+```
+
+### TemplatePrompt
+
+Template-based prompt with variable substitution.
+
+**Static Methods:**
+- `static fromTemplate(template: string): TemplatePrompt` - Create from template string
+
+**Methods:**
+- `format(variables: Record<string, any>): string` - Format template with variables
+
+**Example:**
+```javascript
+import { TemplatePrompt } from 'email-agent-core';
+
+const template = TemplatePrompt.fromTemplate(`
+Hello {name},
+
+Your order #{orderId} has been {status}.
+`);
+
+const formatted = template.format({
+  name: 'John',
+  orderId: '12345',
+  status: 'shipped'
+});
+```
+
+**Template Variables:**
+Use `{variableName}` syntax for variable placeholders.
+
+### Output Parsers
+
+Parse and validate LLM output.
+
+#### JsonOutputParser
+
+Parse JSON output from LLM responses.
+
+```javascript
+import { JsonOutputParser } from 'email-agent-core';
+
+const parser = new JsonOutputParser();
+const result = await parser.parse('{"key": "value"}');
+// Returns: { key: "value" }
+```
+
+**Methods:**
+- `async parse(text: string): Promise<any>` - Parse JSON string to object
+- `getFormatInstructions(): string` - Get instructions for LLM
+
+**Throws:** `OutputParserException` if JSON is invalid.
+
+#### StringOutputParser
+
+Parse plain text output from LLM responses.
+
+```javascript
+import { StringOutputParser } from 'email-agent-core';
+
+const parser = new StringOutputParser();
+const result = await parser.parse('Hello world');
+// Returns: "Hello world"
+```
+
+**Methods:**
+- `async parse(text: string): Promise<string>` - Parse text (returns as-is)
+
+### BasePrompt
+
+Base class for creating custom prompts.
+
+**Methods:**
+- `abstract format(variables: any): string` - Format prompt with variables
+
+**Example - Custom Prompt:**
+```javascript
+import { BasePrompt } from 'email-agent-core';
+
+class CustomPrompt extends BasePrompt {
+  format(variables) {
+    return `Custom prompt with ${variables.value}`;
+  }
+}
+```
+
+### BaseParser
+
+Base class for creating custom output parsers.
+
+**Methods:**
+- `abstract parse(text: string): Promise<T>` - Parse LLM output
+- `getFormatInstructions(): string` - Get format instructions (optional)
+
+**Example - Custom Parser:**
+```javascript
+import { BaseParser } from 'email-agent-core';
+
+class CustomParser extends BaseParser {
+  async parse(text) {
+    // Custom parsing logic
+    return text.trim().toUpperCase();
+  }
+}
+```
+
 ## Configuration
 
 ### Project Initialization
@@ -682,6 +1060,7 @@ Be mindful of:
 
 Planned features:
 - Support for more LLM providers (Anthropic, Google AI, etc.)
+- More Agent features like tool use etc
 - Scheduled email processing with cron
 - Advanced email threading and conversation tracking
 
